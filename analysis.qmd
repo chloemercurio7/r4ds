@@ -37,3 +37,23 @@ print(dbplyr_act)
 activity_codes <- dbplyr_codes |> collect()
 print(activity_codes)
 ```
+
+The 426 detailed activity codes roll up into 18 major categories, from
+`Personal Care Activities` (01) through `Traveling` (18); code 17 is unused.
+Code 50, `Data Codes`, covers unclassifiable, refused, or missing responses,
+not an actual activity. This analysis focuses on four activity categories:
+01 `Personal Care Activities`, 02 `Household Activities`, 03
+`Caring For & Helping Household (HH) Members`, and 12
+`Socializing, Relaxing, and Leisure`. The exact label for category 03 includes
+an ampersand and `(HH)`, so filters must use that spelling to match it.
+
+```{r}
+average_activity_length <- dbplyr_act |>
+  inner_join(dbplyr_codes, by = "activity_code") |>
+  group_by(major_name) |>
+  summarize(average_minutes = mean(duration_min, na.rm = TRUE)) |>
+  arrange(desc(average_minutes)) |>
+  collect()
+
+print(average_activity_length)
+```

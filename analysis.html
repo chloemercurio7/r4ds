@@ -146,7 +146,7 @@ Attaching package: 'dbplyr'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="st">"data/atus.duckdb"</span>, <span class="at">read_only =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/Rtmp7kzrgP/duckdb
+ℹ /tmp/Rtmpqzno3y/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -195,6 +195,40 @@ This is removed when the R session ends.
  9         10499          1 Personal Care Activit…        4 Persona…          99
 10         10501          1 Personal Care Activit…        5 Persona…           1
 # ℹ 416 more rows</code></pre>
+</div>
+</div>
+<p>The 426 detailed activity codes roll up into 18 major categories, from <code>Personal Care Activities</code> (01) through <code>Traveling</code> (18); code 17 is unused. Code 50, <code>Data Codes</code>, covers unclassifiable, refused, or missing responses, not an actual activity. This analysis focuses on four activity categories: 01 <code>Personal Care Activities</code>, 02 <code>Household Activities</code>, 03 <code>Caring For &amp; Helping Household (HH) Members</code>, and 12 <code>Socializing, Relaxing, and Leisure</code>. The exact label for category 03 includes an ampersand and <code>(HH)</code>, so filters must use that spelling to match it.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>average_activity_length <span class="ot">&lt;-</span> dbplyr_act <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(dbplyr_codes, <span class="at">by =</span> <span class="st">"activity_code"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(major_name) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">average_minutes =</span> <span class="fu">mean</span>(duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(average_minutes)) <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(average_activity_length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 18 × 2
+   major_name                                        average_minutes
+   &lt;chr&gt;                                                       &lt;dbl&gt;
+ 1 Work &amp; Work-Related Activities                              180. 
+ 2 Personal Care Activities                                    159. 
+ 3 Education                                                   131. 
+ 4 Socializing, Relaxing, and Leisure                           95.5
+ 5 Volunteer Activities                                         82.1
+ 6 Sports, Exercise, &amp; Recreation                               77.0
+ 7 Religious and Spiritual Activities                           75.0
+ 8 Data Codes                                                   60.1
+ 9 Professional &amp; Personal Care Services                        47.5
+10 Government Services &amp; Civic Obligations                      46.7
+11 Household Activities                                         42.8
+12 Caring For &amp; Helping Nonhousehold (NonHH) Members            41.0
+13 Consumer Purchases                                           36.8
+14 Household Services                                           36.6
+15 Eating and Drinking                                          34.0
+16 Telephone Calls                                              34.0
+17 Caring For &amp; Helping Household (HH) Members                  31.6
+18 Traveling                                                    18.7</code></pre>
 </div>
 </div>
 
