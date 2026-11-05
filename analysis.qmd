@@ -24,6 +24,7 @@ read_excel("data/nba_recruits.xlsx") |>
 ```
 
 ```{r}
+#| cache: true
 #| message: false
 basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
   mutate(
@@ -44,3 +45,5 @@ basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
     )
   )
 ```
+
+The `college` column is `NA` for 81 players, among them the prep-to-pro stars who skipped college before the NBA’s 2006 age rule — Amar’e Stoudemire (2002), LeBron James (2003), and Dwight Howard (2004). Among the rest, Kentucky (41), Duke (39), and Kansas (38) sent the most top-100 recruits in these 16 classes.
