@@ -22,3 +22,31 @@ read_excel("data/nba_recruits.xlsx") |>
   select(rank, nba_mean_ws48, top_mean_wa, total_seasons, drafted) |>
   summary()
 ```
+
+```{r}
+#| message: false
+basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
+  mutate(
+    tier = factor(
+      tier,
+      levels = c(
+        "Never played", "Brief career", "Solid career",
+        "All-Star level", "Superstar"
+      ),
+      ordered = TRUE
+    ),
+    recruit_group = factor(
+      recruit_group,
+      levels = c(
+        "#1–10", "#11–25", "#26–50", "#51–100", "Outside top 100"
+      ),
+      ordered = TRUE
+    )
+  )
+
+basketball_tibble |>
+  count(tier, .drop = FALSE)
+
+basketball_tibble |>
+  count(recruit_group, .drop = FALSE)
+```
