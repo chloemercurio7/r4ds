@@ -15,3 +15,10 @@ library(readxl)
 #| message: false
 glimpse(read_excel("data/nba_recruits.xlsx"))
 ```
+
+```{r}
+#| message: false
+read_excel("data/nba_recruits.xlsx") |>
+  select(rank, nba_mean_ws48, top_mean_wa, total_seasons, drafted) |>
+  summary()
+```
