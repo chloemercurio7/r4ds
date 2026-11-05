@@ -43,10 +43,4 @@ basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
       ordered = TRUE
     )
   )
-
-basketball_tibble |>
-  count(tier, .drop = FALSE)
-
-basketball_tibble |>
-  count(recruit_group, .drop = FALSE)
 ```
