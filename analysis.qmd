@@ -10,3 +10,8 @@ execute:
 library(tidyverse)
 library(readxl)
 ```
+
+```{r}
+#| message: false
+glimpse(read_excel("data/nba_recruits.xlsx"))
+```
