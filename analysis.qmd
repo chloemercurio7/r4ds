@@ -21,6 +21,7 @@ library(dplyr)
 library(dbplyr)
 library(DBI)
 library(duckdb)
+library(ggplot2)
 ```
 
 ```{r}
@@ -62,6 +63,22 @@ activity_avg <- dbplyr_resp |>
   ungroup() |>
   arrange(sex, desc(avg_minutes)) |>
   collect()
+```
+
+```{r}
+activity_avg |>
+  filter(major_name != "Data Codes") |>
+  ggplot(aes(x = reorder(major_name, avg_minutes), y = avg_minutes, fill = sex)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(
+    title = "Average Daily Activity Time",
+    subtitle = "Weekday respondents not in the labor force, by sex",
+    x = "Major activity category",
+    y = "Average minutes per day",
+    fill = "Sex",
+    caption = "Source: American Time Use Survey (ATUS)"
+  )
 ```
 
 ```{r}
