@@ -146,7 +146,7 @@ Attaching package: 'dbplyr'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="st">"data/atus.duckdb"</span>, <span class="at">read_only =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/Rtmp2Pmqx9/duckdb
+ℹ /tmp/RtmpkJUFdM/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -241,12 +241,48 @@ This is removed when the R session ends.
 <pre><code># A tibble: 6 × 3
   sex    employment_status      n
   &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;
-1 Female Employed           78566
-2 Male   Not in labor force 30349
-3 Female Not in labor force 56492
-4 Male   Employed           76716
+1 Female Not in labor force 56492
+2 Male   Employed           76716
+3 Female Employed           78566
+4 Male   Not in labor force 30349
 5 Female Unemployed          5747
 6 Male   Unemployed          4938</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>weekday_minutes <span class="ot">&lt;-</span> dbplyr_act <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    dbplyr_resp <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(day_type <span class="sc">==</span> <span class="st">"Weekday"</span>, employment_status <span class="sc">==</span> <span class="st">"Not in labor force"</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"tucaseid"</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(dbplyr_codes, <span class="at">by =</span> <span class="st">"activity_code"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(major_code <span class="sc">!=</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(tucaseid, major_name) <span class="sc">|&gt;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">minutes =</span> <span class="fu">sum</span>(duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>! Grouped output by "tucaseid".
+ℹ Override behaviour and silence this message with the `.groups` argument.
+ℹ Or use `.by` instead of `group_by()`.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(weekday_minutes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 261,804 × 3
+# Groups:   tucaseid [42,490]
+   tucaseid       major_name                         minutes
+   &lt;chr&gt;          &lt;chr&gt;                                &lt;dbl&gt;
+ 1 20030403031815 Traveling                               65
+ 2 20030403031815 Socializing, Relaxing, and Leisure      60
+ 3 20030403031815 Household Activities                   410
+ 4 20030403031870 Eating and Drinking                     45
+ 5 20030403031870 Traveling                                6
+ 6 20030403031870 Socializing, Relaxing, and Leisure     954
+ 7 20030403031870 Telephone Calls                          5
+ 8 20030403031925 Personal Care Activities               415
+ 9 20030403031925 Consumer Purchases                      60
+10 20030403031970 Personal Care Activities               435
+# ℹ 261,794 more rows</code></pre>
 </div>
 </div>
 

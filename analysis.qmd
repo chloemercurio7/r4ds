@@ -65,3 +65,19 @@ respondent_counts <- dbplyr_resp |>
 
 print(respondent_counts)
 ```
+
+```{r}
+weekday_minutes <- dbplyr_act |>
+  inner_join(
+    dbplyr_resp |>
+      filter(day_type == "Weekday", employment_status == "Not in labor force"),
+    by = "tucaseid"
+  ) |>
+  inner_join(dbplyr_codes, by = "activity_code") |>
+  filter(major_code != 50) |>
+  group_by(tucaseid, major_name) |>
+  summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
+  collect()
+
+print(weekday_minutes)
+```
