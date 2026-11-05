@@ -1,0 +1,73 @@
+---
+title: "Analyzing NBA Recruits"
+author: "Chloe Mercurio"
+execute:
+  echo: false
+---
+
+```{r}
+#| message: false
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+#| message: false
+glimpse(read_excel("data/nba_recruits.xlsx"))
+```
+
+```{r}
+#| message: false
+read_excel("data/nba_recruits.xlsx") |>
+  select(rank, nba_mean_ws48, top_mean_wa, total_seasons, drafted) |>
+  summary()
+```
+
+```{r}
+#| cache: true
+#| message: false
+basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
+  mutate(
+    tier = factor(
+      tier,
+      levels = c(
+        "Never played", "Brief career", "Solid career",
+        "All-Star level", "Superstar"
+      ),
+      ordered = TRUE
+    ),
+    recruit_group = factor(
+      recruit_group,
+      levels = c(
+        "#1–10", "#11–25", "#26–50", "#51–100", "Outside top 100"
+      ),
+      ordered = TRUE
+    )
+  )
+```
+
+```{r}
+#| message: false
+plot_data <- basketball_tibble |>
+  filter(!is.na(rank), !is.na(top_mean_wa))
+
+ggplot(plot_data, aes(x = rank, y = top_mean_wa, color = tier)) +
+  geom_point() +
+  geom_smooth(aes(group = 1), method = "lm", se = FALSE, color = "black") +
+  geom_text(
+    data = filter(
+      plot_data,
+      name %in% c("LeBron James", "Kyle Lowry", "Kawhi Leonard", "Draymond Green")
+    ),
+    aes(label = name),
+    hjust = -0.1,
+    show.legend = FALSE
+  )
+```
+
+The `college` column is `NA` for 81 players, among them the prep-to-pro stars who skipped college before the NBA’s 2006 age rule — Amar’e Stoudemire (2002), LeBron James (2003), and Dwight Howard (2004). Among the rest, Kentucky (41), Duke (39), and Kansas (38) sent the most top-100 recruits in these 16 classes.
+
+`drafted` is `FALSE` for 1,255 of the 1,873 players in `basketball_tibble` and `TRUE` for only 618: most of the top-ranked high school players The Pudding tracked were never drafted at all.
+
+Of the 40 players in the “Superstar” tier, 12 came from the “#1–10” group, but 8 were never ranked in the top 100 at all. The draft gap is far wider than the stardom gap: 84% of “#1–10” recruits were drafted, against 13% of the “#51–100” group.
+

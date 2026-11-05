@@ -48,8 +48,21 @@ basketball_tibble <- read_excel("data/nba_recruits.xlsx") |>
 
 ```{r}
 #| message: false
-ggplot(basketball_tibble, aes(y = recruit_group, fill = tier)) +
-  geom_bar(position = "fill")
+plot_data <- basketball_tibble |>
+  filter(!is.na(rank), !is.na(top_mean_wa))
+
+ggplot(plot_data, aes(x = rank, y = top_mean_wa, color = tier)) +
+  geom_point() +
+  geom_smooth(aes(group = 1), method = "lm", se = FALSE, color = "black") +
+  geom_text(
+    data = filter(
+      plot_data,
+      name %in% c("LeBron James", "Kyle Lowry", "Kawhi Leonard", "Draymond Green")
+    ),
+    aes(label = name),
+    hjust = -0.1,
+    show.legend = FALSE
+  )
 ```
 
 The `college` column is `NA` for 81 players, among them the prep-to-pro stars who skipped college before the NBA’s 2006 age rule — Amar’e Stoudemire (2002), LeBron James (2003), and Dwight Howard (2004). Among the rest, Kentucky (41), Duke (39), and Kansas (38) sent the most top-100 recruits in these 16 classes.
