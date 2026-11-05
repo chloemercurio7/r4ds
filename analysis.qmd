@@ -14,3 +14,13 @@ library(dbplyr)
 library(DBI)
 library(duckdb)
 ```
+
+```{r}
+con <- dbConnect(duckdb(), dbdir = "data/atus.duckdb", read_only = TRUE)
+
+dbplyr_act <- tbl(con, "activities")
+dbplyr_resp <- tbl(con, "respondents")
+dbplyr_codes <- tbl(con, "activity_codes")
+
+print(dbplyr_act)
+```
