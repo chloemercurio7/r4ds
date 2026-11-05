@@ -29,61 +29,36 @@ con <- dbConnect(duckdb(), dbdir = "data/atus.duckdb", read_only = TRUE)
 dbplyr_act <- tbl(con, "activities")
 dbplyr_resp <- tbl(con, "respondents")
 dbplyr_codes <- tbl(con, "activity_codes")
-
-print(dbplyr_act)
 ```
 
 ```{r}
-activity_codes <- dbplyr_codes |> collect()
-print(activity_codes)
-```
-
-The 426 detailed activity codes roll up into 18 major categories, from
-`Personal Care Activities` (01) through `Traveling` (18); code 17 is unused.
-Code 50, `Data Codes`, covers unclassifiable, refused, or missing responses,
-not an actual activity. This analysis focuses on four activity categories:
-01 `Personal Care Activities`, 02 `Household Activities`, 03
-`Caring For & Helping Household (HH) Members`, and 12
-`Socializing, Relaxing, and Leisure`. The exact label for category 03 includes
-an ampersand and `(HH)`, so filters must use that spelling to match it.
-
-```{r}
-average_activity_length <- dbplyr_act |>
-  inner_join(dbplyr_codes, by = "activity_code") |>
-  group_by(major_name) |>
-  summarize(average_minutes = mean(duration_min, na.rm = TRUE)) |>
-  arrange(desc(average_minutes)) |>
-  collect()
-
-print(average_activity_length)
-```
-
-```{r}
-respondent_counts <- dbplyr_resp |>
-  count(sex, employment_status) |>
-  collect()
-
-print(respondent_counts)
-```
-
-```{r}
-weekday_person_minutes <- dbplyr_act |>
-  inner_join(
-    dbplyr_resp |>
-      filter(day_type == "Weekday", employment_status == "Not in labor force"),
-    by = "tucaseid"
+activity_avg <- dbplyr_resp |>
+  filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+  select(tucaseid, sex) |>
+  cross_join(
+    dbplyr_codes |>
+      filter(major_code != 50) |>
+      distinct(major_code, major_name)
   ) |>
-  inner_join(dbplyr_codes, by = "activity_code") |>
-  filter(major_code != 50) |>
-  group_by(tucaseid, sex, major_name) |>
-  summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
-  ungroup()
-
-activity_avg <- weekday_person_minutes |>
+  left_join(
+    dbplyr_act |>
+      inner_join(
+        dbplyr_resp |>
+          filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+          select(tucaseid, sex),
+        by = "tucaseid"
+      ) |>
+      inner_join(dbplyr_codes, by = "activity_code") |>
+      filter(major_code != 50) |>
+      group_by(tucaseid, sex, major_name) |>
+      summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
+      ungroup(),
+    by = c("tucaseid", "sex", "major_name")
+  ) |>
+  mutate(minutes = coalesce(minutes, 0)) |>
   group_by(sex, major_name) |>
   summarize(avg_minutes = mean(minutes, na.rm = TRUE)) |>
+  ungroup() |>
   arrange(sex, desc(avg_minutes)) |>
   collect()
-
-print(activity_avg)
 ```

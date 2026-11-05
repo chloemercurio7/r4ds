@@ -146,7 +146,7 @@ Attaching package: 'dbplyr'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="st">"data/atus.duckdb"</span>, <span class="at">read_only =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/RtmpR92bGp/duckdb
+ℹ /tmp/RtmpvcwOs7/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -156,143 +156,45 @@ This is removed when the R session ends.
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dbplyr_act <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"activities"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>dbplyr_resp <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"respondents"</span>)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>dbplyr_codes <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"activity_codes"</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(dbplyr_act)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A query:  ?? x 4
-# Database: DuckDB 2.0.0 [unknown@Linux 6.8.0-1064-azure:R 4.6.1//workspaces/R4DS/data/atus.duckdb]
-   tucaseid       activity_code duration_min start_hhmm
-   &lt;chr&gt;                  &lt;int&gt;        &lt;int&gt;      &lt;int&gt;
- 1 20030100013280        130124           60        400
- 2 20030100013280         10201           30        500
- 3 20030100013280         10101          600        530
- 4 20030100013280        120303          150       1530
- 5 20030100013280        110101            5       1800
- 6 20030100013280        120303          175       1805
- 7 20030100013280         10101          270       2100
- 8 20030100013280         10201           10        130
- 9 20030100013280        130124          140        140
-10 20030100013344         10101          180        400
-# ℹ more rows</code></pre>
-</div>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>dbplyr_codes <span class="ot">&lt;-</span> <span class="fu">tbl</span>(con, <span class="st">"activity_codes"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>activity_codes <span class="ot">&lt;-</span> dbplyr_codes <span class="sc">|&gt;</span> <span class="fu">collect</span>()</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(activity_codes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 426 × 6
-   activity_code major_code major_name             sub_code sub_name detail_code
-           &lt;int&gt;      &lt;int&gt; &lt;chr&gt;                     &lt;int&gt; &lt;chr&gt;          &lt;int&gt;
- 1         10101          1 Personal Care Activit…        1 Sleeping           1
- 2         10102          1 Personal Care Activit…        1 Sleeping           2
- 3         10199          1 Personal Care Activit…        1 Sleeping          99
- 4         10201          1 Personal Care Activit…        2 Grooming           1
- 5         10299          1 Personal Care Activit…        2 Grooming          99
- 6         10301          1 Personal Care Activit…        3 Health-…           1
- 7         10399          1 Personal Care Activit…        3 Health-…          99
- 8         10401          1 Personal Care Activit…        4 Persona…           1
- 9         10499          1 Personal Care Activit…        4 Persona…          99
-10         10501          1 Personal Care Activit…        5 Persona…           1
-# ℹ 416 more rows</code></pre>
-</div>
-</div>
-<p>The 426 detailed activity codes roll up into 18 major categories, from <code>Personal Care Activities</code> (01) through <code>Traveling</code> (18); code 17 is unused. Code 50, <code>Data Codes</code>, covers unclassifiable, refused, or missing responses, not an actual activity. This analysis focuses on four activity categories: 01 <code>Personal Care Activities</code>, 02 <code>Household Activities</code>, 03 <code>Caring For &amp; Helping Household (HH) Members</code>, and 12 <code>Socializing, Relaxing, and Leisure</code>. The exact label for category 03 includes an ampersand and <code>(HH)</code>, so filters must use that spelling to match it.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>average_activity_length <span class="ot">&lt;-</span> dbplyr_act <span class="sc">|&gt;</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(dbplyr_codes, <span class="at">by =</span> <span class="st">"activity_code"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(major_name) <span class="sc">|&gt;</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">average_minutes =</span> <span class="fu">mean</span>(duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(average_minutes)) <span class="sc">|&gt;</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(average_activity_length)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 18 × 2
-   major_name                                        average_minutes
-   &lt;chr&gt;                                                       &lt;dbl&gt;
- 1 Work &amp; Work-Related Activities                              180. 
- 2 Personal Care Activities                                    159. 
- 3 Education                                                   131. 
- 4 Socializing, Relaxing, and Leisure                           95.5
- 5 Volunteer Activities                                         82.1
- 6 Sports, Exercise, &amp; Recreation                               77.0
- 7 Religious and Spiritual Activities                           75.0
- 8 Data Codes                                                   60.1
- 9 Professional &amp; Personal Care Services                        47.5
-10 Government Services &amp; Civic Obligations                      46.7
-11 Household Activities                                         42.8
-12 Caring For &amp; Helping Nonhousehold (NonHH) Members            41.0
-13 Consumer Purchases                                           36.8
-14 Household Services                                           36.6
-15 Eating and Drinking                                          34.0
-16 Telephone Calls                                              34.0
-17 Caring For &amp; Helping Household (HH) Members                  31.6
-18 Traveling                                                    18.7</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>respondent_counts <span class="ot">&lt;-</span> dbplyr_resp <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(sex, employment_status) <span class="sc">|&gt;</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(respondent_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 × 3
-  sex    employment_status      n
-  &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;
-1 Female Employed           78566
-2 Male   Not in labor force 30349
-3 Female Not in labor force 56492
-4 Male   Employed           76716
-5 Female Unemployed          5747
-6 Male   Unemployed          4938</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>weekday_person_minutes <span class="ot">&lt;-</span> dbplyr_act <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    dbplyr_resp <span class="sc">|&gt;</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(day_type <span class="sc">==</span> <span class="st">"Weekday"</span>, employment_status <span class="sc">==</span> <span class="st">"Not in labor force"</span>),</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"tucaseid"</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(dbplyr_codes, <span class="at">by =</span> <span class="st">"activity_code"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(major_code <span class="sc">!=</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(tucaseid, sex, major_name) <span class="sc">|&gt;</span></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">minutes =</span> <span class="fu">sum</span>(duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>activity_avg <span class="ot">&lt;-</span> dbplyr_resp <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(day_type <span class="sc">==</span> <span class="st">"Weekday"</span>, employment_status <span class="sc">==</span> <span class="st">"Not in labor force"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(tucaseid, sex) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cross_join</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    dbplyr_codes <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(major_code <span class="sc">!=</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">distinct</span>(major_code, major_name)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    dbplyr_act <span class="sc">|&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">inner_join</span>(</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        dbplyr_resp <span class="sc">|&gt;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>          <span class="fu">filter</span>(day_type <span class="sc">==</span> <span class="st">"Weekday"</span>, employment_status <span class="sc">==</span> <span class="st">"Not in labor force"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">select</span>(tucaseid, sex),</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">by =</span> <span class="st">"tucaseid"</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>      ) <span class="sc">|&gt;</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>      <span class="fu">inner_join</span>(dbplyr_codes, <span class="at">by =</span> <span class="st">"activity_code"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>      <span class="fu">filter</span>(major_code <span class="sc">!=</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">group_by</span>(tucaseid, sex, major_name) <span class="sc">|&gt;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summarize</span>(<span class="at">minutes =</span> <span class="fu">sum</span>(duration_min, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ungroup</span>(),</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"tucaseid"</span>, <span class="st">"sex"</span>, <span class="st">"major_name"</span>)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">minutes =</span> <span class="fu">coalesce</span>(minutes, <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sex, major_name) <span class="sc">|&gt;</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_minutes =</span> <span class="fu">mean</span>(minutes, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(sex, <span class="fu">desc</span>(avg_minutes)) <span class="sc">|&gt;</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>! Grouped output by "tucaseid" and "sex".
 ℹ Override behaviour and silence this message with the `.groups` argument.
-ℹ Or use `.by` instead of `group_by()`.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>activity_avg <span class="ot">&lt;-</span> weekday_person_minutes <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(sex, major_name) <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_minutes =</span> <span class="fu">mean</span>(minutes, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(sex, <span class="fu">desc</span>(avg_minutes)) <span class="sc">|&gt;</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>! Grouped output by "sex".
+ℹ Or use `.by` instead of `group_by()`.
+! Grouped output by "sex".
 ℹ Override behaviour and silence this message with the `.groups` argument.
 ℹ Or use `.by` instead of `group_by()`.</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(activity_avg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 34 × 3
-# Groups:   sex [2]
-   sex    major_name                                        avg_minutes
-   &lt;chr&gt;  &lt;chr&gt;                                                   &lt;dbl&gt;
- 1 Female Personal Care Activities                                594. 
- 2 Female Education                                               366. 
- 3 Female Socializing, Relaxing, and Leisure                      359. 
- 4 Female Household Activities                                    198. 
- 5 Female Work &amp; Work-Related Activities                          196. 
- 6 Female Caring For &amp; Helping Household (HH) Members             167. 
- 7 Female Volunteer Activities                                    143. 
- 8 Female Caring For &amp; Helping Nonhousehold (NonHH) Members        94.2
- 9 Female Traveling                                                78.1
-10 Female Professional &amp; Personal Care Services                    75.5
-# ℹ 24 more rows</code></pre>
 </div>
 </div>
 
