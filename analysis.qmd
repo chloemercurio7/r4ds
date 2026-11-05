@@ -67,7 +67,7 @@ print(respondent_counts)
 ```
 
 ```{r}
-weekday_minutes <- dbplyr_act |>
+weekday_person_minutes <- dbplyr_act |>
   inner_join(
     dbplyr_resp |>
       filter(day_type == "Weekday", employment_status == "Not in labor force"),
@@ -75,9 +75,15 @@ weekday_minutes <- dbplyr_act |>
   ) |>
   inner_join(dbplyr_codes, by = "activity_code") |>
   filter(major_code != 50) |>
-  group_by(tucaseid, major_name) |>
+  group_by(tucaseid, sex, major_name) |>
   summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
+  ungroup()
+
+activity_avg <- weekday_person_minutes |>
+  group_by(sex, major_name) |>
+  summarize(avg_minutes = mean(minutes, na.rm = TRUE)) |>
+  arrange(sex, desc(avg_minutes)) |>
   collect()
 
-print(weekday_minutes)
+print(activity_avg)
 ```
