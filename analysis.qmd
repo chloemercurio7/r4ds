@@ -8,6 +8,14 @@ file rather than a CSV to avoid loading the entire table into R's memory.
 `dbplyr` translates familiar `dplyr` pipelines into SQL for DuckDB to run; R
 receives only the requested rows when you call `collect()`.
 
+The `activities` table records each diary entry's start time and duration.
+`respondents` has one row per person, including sex, age, and employment
+status, while `activity_codes` maps numeric codes to category names. The
+six-digit `activity_code` encodes a three-level hierarchy: `120303` means
+Socializing, Relaxing, and Leisure (`12`) > TV and Movies (`03`) > Watching TV
+(`03`). Likewise, `start_hhmm` encodes time in HHMM format, so `1430` means
+2:30 PM.
+
 ```{r}
 library(dplyr)
 library(dbplyr)
