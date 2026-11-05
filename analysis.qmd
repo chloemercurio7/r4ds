@@ -63,3 +63,46 @@ activity_avg <- dbplyr_resp |>
   arrange(sex, desc(avg_minutes)) |>
   collect()
 ```
+
+```{r}
+weekday_respondents <- dbplyr_resp |>
+  filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+  select(tucaseid, sex)
+
+major_categories <- dbplyr_codes |>
+  filter(major_code %in% c(1, 2, 3, 12)) |>
+  distinct(major_code, major_name)
+
+weekday_sex_counts <- weekday_respondents |>
+  count(sex, name = "n_respondents") |>
+  collect()
+
+hourly_minutes <- dbplyr_act |>
+  inner_join(weekday_respondents, by = "tucaseid") |>
+  inner_join(
+    dbplyr_codes |>
+      filter(major_code %in% c(1, 2, 3, 12)) |>
+      select(activity_code, major_code, major_name),
+    by = "activity_code"
+  ) |>
+  mutate(hour = floor(start_hhmm / 100)) |>
+  filter(hour >= 6, hour <= 23) |>
+  group_by(sex, major_code, major_name, hour) |>
+  summarize(total_minutes = sum(duration_min, na.rm = TRUE)) |>
+  collect()
+
+hourly_avg <- tidyr::crossing(
+  weekday_sex_counts,
+  major_categories |> collect(),
+  hour = 6:23
+) |>
+  left_join(
+    hourly_minutes,
+    by = c("sex", "major_code", "major_name", "hour")
+  ) |>
+  mutate(avg_minutes = coalesce(total_minutes, 0) / n_respondents) |>
+  select(sex, major_code, major_name, hour, avg_minutes) |>
+  arrange(sex, major_code, hour)
+
+print(hourly_avg)
+```
