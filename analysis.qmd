@@ -1,9 +1,12 @@
 ---
 title: "Analyzing NBA Recruits"
 author: "Chloe Mercurio"
+execute:
+  echo: false
 ---
 
 ```{r}
+#| message: false
 library(tidyverse)
 library(readxl)
 ```
