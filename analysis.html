@@ -146,7 +146,7 @@ Attaching package: 'dbplyr'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="st">"data/atus.duckdb"</span>, <span class="at">read_only =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/Rtmpqzno3y/duckdb
+ℹ /tmp/Rtmp2Pmqx9/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -229,6 +229,24 @@ This is removed when the R session ends.
 16 Telephone Calls                                              34.0
 17 Caring For &amp; Helping Household (HH) Members                  31.6
 18 Traveling                                                    18.7</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>respondent_counts <span class="ot">&lt;-</span> dbplyr_resp <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(sex, employment_status) <span class="sc">|&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(respondent_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  sex    employment_status      n
+  &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;
+1 Female Employed           78566
+2 Male   Not in labor force 30349
+3 Female Not in labor force 56492
+4 Male   Employed           76716
+5 Female Unemployed          5747
+6 Male   Unemployed          4938</code></pre>
 </div>
 </div>
 

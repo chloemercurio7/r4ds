@@ -57,3 +57,11 @@ average_activity_length <- dbplyr_act |>
 
 print(average_activity_length)
 ```
+
+```{r}
+respondent_counts <- dbplyr_resp |>
+  count(sex, employment_status) |>
+  collect()
+
+print(respondent_counts)
+```
