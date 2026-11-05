@@ -32,3 +32,8 @@ dbplyr_codes <- tbl(con, "activity_codes")
 
 print(dbplyr_act)
 ```
+
+```{r}
+activity_codes <- dbplyr_codes |> collect()
+print(activity_codes)
+```

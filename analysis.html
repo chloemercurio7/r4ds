@@ -112,6 +112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>An ATUS activity table contains 4.9 million rows, so it is stored in a DuckDB file rather than a CSV to avoid loading the entire table into R’s memory. <code>dbplyr</code> translates familiar <code>dplyr</code> pipelines into SQL for DuckDB to run; R receives only the requested rows when you call <code>collect()</code>.</p>
+<p>The <code>activities</code> table records each diary entry’s start time and duration. <code>respondents</code> has one row per person, including sex, age, and employment status, while <code>activity_codes</code> maps numeric codes to category names. The six-digit <code>activity_code</code> encodes a three-level hierarchy: <code>120303</code> means Socializing, Relaxing, and Leisure (<code>12</code>) &gt; TV and Movies (<code>03</code>) &gt; Watching TV (<code>03</code>). Likewise, <code>start_hhmm</code> encodes time in HHMM format, so <code>1430</code> means 2:30 PM.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
@@ -145,7 +146,7 @@ Attaching package: 'dbplyr'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(<span class="fu">duckdb</span>(), <span class="at">dbdir =</span> <span class="st">"data/atus.duckdb"</span>, <span class="at">read_only =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/RtmpSEuBlr/duckdb
+ℹ /tmp/Rtmp47Q9Ps/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -174,6 +175,26 @@ This is removed when the R session ends.
  9 20030100013280        130124          140        140
 10 20030100013344         10101          180        400
 # ℹ more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>activity_codes <span class="ot">&lt;-</span> dbplyr_codes <span class="sc">|&gt;</span> <span class="fu">collect</span>()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(activity_codes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 426 × 6
+   activity_code major_code major_name             sub_code sub_name detail_code
+           &lt;int&gt;      &lt;int&gt; &lt;chr&gt;                     &lt;int&gt; &lt;chr&gt;          &lt;int&gt;
+ 1         10101          1 Personal Care Activit…        1 Sleeping           1
+ 2         10102          1 Personal Care Activit…        1 Sleeping           2
+ 3         10199          1 Personal Care Activit…        1 Sleeping          99
+ 4         10201          1 Personal Care Activit…        2 Grooming           1
+ 5         10299          1 Personal Care Activit…        2 Grooming          99
+ 6         10301          1 Personal Care Activit…        3 Health-…           1
+ 7         10399          1 Personal Care Activit…        3 Health-…          99
+ 8         10401          1 Personal Care Activit…        4 Persona…           1
+ 9         10499          1 Personal Care Activit…        4 Persona…          99
+10         10501          1 Personal Care Activit…        5 Persona…           1
+# ℹ 416 more rows</code></pre>
 </div>
 </div>
 
