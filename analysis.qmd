@@ -3,6 +3,14 @@ title: "Analyzing Americans' Time Use"
 author: "Chloe Mercurio"
 ---
 
+An ATUS activity table contains 4.9 million rows, so it is stored in a DuckDB
+file rather than a CSV to avoid loading the entire table into R's memory.
+`dbplyr` translates familiar `dplyr` pipelines into SQL for DuckDB to run; R
+receives only the requested rows when you call `collect()`.
+
 ```{r}
-library(tidyverse)
+library(dplyr)
+library(dbplyr)
+library(DBI)
+library(duckdb)
 ```
