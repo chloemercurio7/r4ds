@@ -32,6 +32,7 @@ dbplyr_codes <- tbl(con, "activity_codes")
 ```
 
 ```{r}
+#| cache: true
 activity_avg <- dbplyr_resp |>
   filter(day_type == "Weekday", employment_status == "Not in labor force") |>
   select(tucaseid, sex) |>
