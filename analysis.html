@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/Rtmp0beJrL/duckdb
+ℹ /tmp/RtmpJ3lC4Q/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -106,6 +106,22 @@ This is removed when the R session ends.
  9 20030100013280        130124          140        140
 10 20030100013344         10101          180        400
 # ℹ more rows</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 426 × 6
+   activity_code major_code major_name             sub_code sub_name detail_code
+           &lt;int&gt;      &lt;int&gt; &lt;chr&gt;                     &lt;int&gt; &lt;chr&gt;          &lt;int&gt;
+ 1         10101          1 Personal Care Activit…        1 Sleeping           1
+ 2         10102          1 Personal Care Activit…        1 Sleeping           2
+ 3         10199          1 Personal Care Activit…        1 Sleeping          99
+ 4         10201          1 Personal Care Activit…        2 Grooming           1
+ 5         10299          1 Personal Care Activit…        2 Grooming          99
+ 6         10301          1 Personal Care Activit…        3 Health-…           1
+ 7         10399          1 Personal Care Activit…        3 Health-…          99
+ 8         10401          1 Personal Care Activit…        4 Persona…           1
+ 9         10499          1 Personal Care Activit…        4 Persona…          99
+10         10501          1 Personal Care Activit…        5 Persona…           1
+# ℹ 416 more rows</code></pre>
 </div>
 </div>
 <div class="cell">
