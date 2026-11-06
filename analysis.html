@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/RtmpS7VZNv/duckdb
+ℹ /tmp/Rtmp5Q5v4j/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -163,6 +163,30 @@ This is removed when the R session ends.
 </div>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
+<pre><code>! Grouped output by "tucaseid" and "major_code".
+ℹ Override behaviour and silence this message with the `.groups` argument.
+ℹ Or use `.by` instead of `group_by()`.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 261,804 × 4
+# Groups:   tucaseid, major_code [261,804]
+   tucaseid       major_code major_name                                  minutes
+   &lt;chr&gt;               &lt;int&gt; &lt;chr&gt;                                         &lt;dbl&gt;
+ 1 20030403031815          1 Personal Care Activities                        450
+ 2 20030403031815          4 Caring For &amp; Helping Nonhousehold (NonHH) …     335
+ 3 20030403031815         12 Socializing, Relaxing, and Leisure               60
+ 4 20030403031870          1 Personal Care Activities                        430
+ 5 20030403031925         12 Socializing, Relaxing, and Leisure              580
+ 6 20030403031925         18 Traveling                                        30
+ 7 20030403031925         14 Religious and Spiritual Activities               60
+ 8 20030403031925          7 Consumer Purchases                               60
+ 9 20030403031925          2 Household Activities                            145
+10 20030403031925         11 Eating and Drinking                              30
+# ℹ 261,794 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
 <pre><code>! Grouped output by "tucaseid" and "sex".
 ℹ Override behaviour and silence this message with the `.groups` argument.
 ℹ Or use `.by` instead of `group_by()`.
@@ -175,7 +199,7 @@ This is removed when the R session ends.
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
