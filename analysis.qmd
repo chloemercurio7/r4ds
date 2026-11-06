@@ -65,3 +65,10 @@ activity_avg <- dbplyr_resp |>
   arrange(sex, desc(avg_minutes)) |>
   collect()
 ```
+
+That render took as long as the last one, because the aggregation over 4.9
+million rows still had to run once to fill `analysis_cache/`. From now on every
+render reads the 36-row `activity_avg` back from disk and never touches the
+database. The cache is keyed on the chunk's code, not on the database file. If
+you ever drop a newer `atus.duckdb` into `data/`, delete `analysis_cache/`
+before trusting the numbers.
