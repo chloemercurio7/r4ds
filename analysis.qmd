@@ -1,6 +1,8 @@
 ---
 title: "Analyzing Americans' Time Use"
 author: "Chloe Mercurio"
+execute:
+  echo: false
 ---
 
 An ATUS activity table contains 4.9 million rows, so it is stored in a DuckDB
@@ -17,6 +19,7 @@ Socializing, Relaxing, and Leisure (`12`) > TV and Movies (`03`) > Watching TV
 2:30 PM.
 
 ```{r}
+#| message: false
 library(dplyr)
 library(dbplyr)
 library(DBI)
