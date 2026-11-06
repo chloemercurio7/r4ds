@@ -32,144 +32,36 @@ con <- dbConnect(duckdb(), dbdir = "data/atus.duckdb", read_only = TRUE)
 dbplyr_act <- tbl(con, "activities")
 dbplyr_resp <- tbl(con, "respondents")
 dbplyr_codes <- tbl(con, "activity_codes")
-
-dbplyr_act
-dbplyr_codes |> collect()
 ```
 
 ```{r}
-avg_activity_duration <- dbplyr_act |>
-  inner_join(dbplyr_codes, by = "activity_code") |>
-  filter(major_code != 50) |>
-  group_by(major_name) |>
-  summarize(avg_duration_min = mean(duration_min, na.rm = TRUE)) |>
-  arrange(desc(avg_duration_min)) |>
-  collect()
-
-print(avg_activity_duration)
-```
-
-```{r}
-respondent_counts <- dbplyr_resp |>
-  count(sex, employment_status) |>
-  collect()
-
-print(respondent_counts)
-```
-
-```{r}
-person_activity_minutes <- dbplyr_act |>
-  inner_join(
+#| cache: true
+activity_avg <- dbplyr_resp |>
+  filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+  select(tucaseid, sex) |>
+  cross_join(
     dbplyr_codes |>
       filter(major_code != 50) |>
-      select(activity_code, major_code, major_name),
-    by = "activity_code"
+      distinct(major_code, major_name)
   ) |>
-  group_by(tucaseid, major_code, major_name) |>
-  summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
-  ungroup() |>
-  right_join(
-    dbplyr_resp |>
-      filter(day_type == "Weekday", employment_status == "Not in labor force") |>
-      select(tucaseid, sex) |>
-      cross_join(
-        dbplyr_codes |>
-          filter(major_code != 50) |>
-          distinct(major_code, major_name)
-      ),
-    by = c("tucaseid", "major_code", "major_name")
+  left_join(
+    dbplyr_act |>
+      inner_join(
+        dbplyr_resp |>
+          filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+          select(tucaseid, sex),
+        by = "tucaseid"
+      ) |>
+      inner_join(dbplyr_codes, by = "activity_code") |>
+      filter(major_code != 50) |>
+      group_by(tucaseid, sex, major_name) |>
+      summarize(minutes = sum(duration_min, na.rm = TRUE)) |>
+      ungroup(),
+    by = c("tucaseid", "sex", "major_name")
   ) |>
   mutate(minutes = coalesce(minutes, 0)) |>
-  collect()
-
-print(person_activity_minutes)
-```
-
-```{r}
-activity_avg <- person_activity_minutes |>
   group_by(sex, major_name) |>
-  summarize(avg_minutes = mean(minutes)) |>
+  summarize(avg_minutes = mean(minutes, na.rm = TRUE)) |>
   arrange(sex, desc(avg_minutes)) |>
-  ungroup()
-
-print(activity_avg)
-```
-
-```{r}
-activity_avg |>
-  filter(major_name != "Data Codes") |>
-  ggplot(aes(x = reorder(major_name, avg_minutes), y = avg_minutes, fill = sex)) +
-  geom_col(position = "dodge") +
-  coord_flip() +
-  labs(
-    title = "Average Daily Activity Time",
-    subtitle = "Weekday respondents not in the labor force, by sex",
-    x = "Major activity category",
-    y = "Average minutes per day",
-    fill = "Sex",
-    caption = "Source: American Time Use Survey (ATUS)"
-  )
-```
-
-426 detailed codes roll up into 18 major categories, from `Personal Care
-Activities` (01) through `Traveling` (18), with 17 unused. Major code 50,
-`Data Codes`, is where the survey files put unclassifiable, refused, and
-missing answers rather than an actual activity. This section works with four
-of the real ones: 01 Personal Care, 02 Household Activities, 03 Caring For &
-Helping Household (HH) Members, and 12 Socializing, Relaxing, and Leisure.
-That third label uses an ampersand and the abbreviation `(HH)`, so a filter
-written from the plain-English name will silently match nothing.
-
-```{r}
-weekday_respondents <- dbplyr_resp |>
-  filter(day_type == "Weekday", employment_status == "Not in labor force") |>
-  select(tucaseid, sex)
-
-major_categories <- dbplyr_codes |>
-  filter(major_code %in% c(1, 2, 3, 12)) |>
-  distinct(major_code, major_name)
-
-weekday_sex_counts <- weekday_respondents |>
-  count(sex, name = "n_respondents") |>
   collect()
-
-hourly_minutes <- dbplyr_act |>
-  inner_join(weekday_respondents, by = "tucaseid") |>
-  inner_join(
-    dbplyr_codes |>
-      filter(major_code %in% c(1, 2, 3, 12)) |>
-      select(activity_code, major_code, major_name),
-    by = "activity_code"
-  ) |>
-  mutate(hour = floor(start_hhmm / 100)) |>
-  filter(hour >= 6, hour <= 23) |>
-  group_by(sex, major_code, major_name, hour) |>
-  summarize(total_minutes = sum(duration_min, na.rm = TRUE)) |>
-  collect()
-
-hourly_avg <- tidyr::crossing(
-  weekday_sex_counts,
-  major_categories |> collect(),
-  hour = 6:23
-) |>
-  left_join(
-    hourly_minutes,
-    by = c("sex", "major_code", "major_name", "hour")
-  ) |>
-  mutate(avg_minutes = coalesce(total_minutes, 0) / n_respondents) |>
-  select(sex, major_code, major_name, hour, avg_minutes) |>
-  arrange(sex, major_code, hour)
-
-print(hourly_avg)
 ```
-
-`..` is the directory one level up. Everything in a Codespace lives under
-`/workspaces`: the course's `codespace-starter` folder, which the Codespace
-was built from, and one folder per repo you have connected, here just
-`r4ds-6`. If `analysis.qmd` ever goes missing, look here first: it must be
-inside `/workspaces/r4ds-6`, not beside it.
-
-The prompt names the folder you are in, which is the working directory every
-command runs from: `quarto render analysis.qmd` works only when the prompt says
-`r4ds-6 $`. A new bash Terminal always opens in the folder VS Code has open,
-so the quickest fix for a terminal that has wandered off is a new one.
