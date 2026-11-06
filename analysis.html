@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/RtmpJ3lC4Q/duckdb
+ℹ /tmp/RtmpWNwRCW/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -125,6 +125,30 @@ This is removed when the R session ends.
 </div>
 </div>
 <div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 17 × 2
+   major_name                                        avg_duration_min
+   &lt;chr&gt;                                                        &lt;dbl&gt;
+ 1 Work &amp; Work-Related Activities                               180. 
+ 2 Personal Care Activities                                     159. 
+ 3 Education                                                    131. 
+ 4 Socializing, Relaxing, and Leisure                            95.5
+ 5 Volunteer Activities                                          82.1
+ 6 Sports, Exercise, &amp; Recreation                                77.0
+ 7 Religious and Spiritual Activities                            75.0
+ 8 Professional &amp; Personal Care Services                         47.5
+ 9 Government Services &amp; Civic Obligations                       46.7
+10 Household Activities                                          42.8
+11 Caring For &amp; Helping Nonhousehold (NonHH) Members             41.0
+12 Consumer Purchases                                            36.8
+13 Household Services                                            36.6
+14 Eating and Drinking                                           34.0
+15 Telephone Calls                                               34.0
+16 Caring For &amp; Helping Household (HH) Members                   31.6
+17 Traveling                                                     18.7</code></pre>
+</div>
+</div>
+<div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>! Grouped output by "tucaseid" and "sex".
 ℹ Override behaviour and silence this message with the `.groups` argument.
@@ -138,11 +162,12 @@ This is removed when the R session ends.
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="analysis_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>426 detailed codes roll up into 18 major categories, from <code>Personal Care Activities</code> (01) through <code>Traveling</code> (18), with 17 unused. Major code 50, <code>Data Codes</code>, is where the survey files put unclassifiable, refused, and missing answers rather than an actual activity. This section works with four of the real ones: 01 Personal Care, 02 Household Activities, 03 Caring For &amp; Helping Household (HH) Members, and 12 Socializing, Relaxing, and Leisure. That third label uses an ampersand and the abbreviation <code>(HH)</code>, so a filter written from the plain-English name will silently match nothing.</p>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>! Grouped output by "sex", "major_code", and "major_name".
