@@ -38,6 +38,18 @@ dbplyr_codes |> collect()
 ```
 
 ```{r}
+avg_activity_duration <- dbplyr_act |>
+  inner_join(dbplyr_codes, by = "activity_code") |>
+  filter(major_code != 50) |>
+  group_by(major_name) |>
+  summarize(avg_duration_min = mean(duration_min, na.rm = TRUE)) |>
+  arrange(desc(avg_duration_min)) |>
+  collect()
+
+print(avg_activity_duration)
+```
+
+```{r}
 #| cache: true
 activity_avg <- dbplyr_resp |>
   filter(day_type == "Weekday", employment_status == "Not in labor force") |>
@@ -85,6 +97,15 @@ activity_avg |>
     caption = "Source: American Time Use Survey (ATUS)"
   )
 ```
+
+426 detailed codes roll up into 18 major categories, from `Personal Care
+Activities` (01) through `Traveling` (18), with 17 unused. Major code 50,
+`Data Codes`, is where the survey files put unclassifiable, refused, and
+missing answers rather than an actual activity. This section works with four
+of the real ones: 01 Personal Care, 02 Household Activities, 03 Caring For &
+Helping Household (HH) Members, and 12 Socializing, Relaxing, and Leisure.
+That third label uses an ampersand and the abbreviation `(HH)`, so a filter
+written from the plain-English name will silently match nothing.
 
 ```{r}
 weekday_respondents <- dbplyr_resp |>
