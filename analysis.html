@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
-ℹ /tmp/RtmpWNwRCW/duckdb
+ℹ /tmp/RtmpS7VZNv/duckdb
 This is removed when the R session ends.
 • Extensions are re-downloaded each session.
 • Secrets are lost.
@@ -149,6 +149,19 @@ This is removed when the R session ends.
 </div>
 </div>
 <div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  sex    employment_status      n
+  &lt;chr&gt;  &lt;chr&gt;              &lt;dbl&gt;
+1 Female Not in labor force 56492
+2 Male   Employed           76716
+3 Female Employed           78566
+4 Male   Not in labor force 30349
+5 Female Unemployed          5747
+6 Male   Unemployed          4938</code></pre>
+</div>
+</div>
+<div class="cell">
 <div class="cell-output cell-output-stderr">
 <pre><code>! Grouped output by "tucaseid" and "sex".
 ℹ Override behaviour and silence this message with the `.groups` argument.
@@ -162,7 +175,7 @@ This is removed when the R session ends.
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="analysis_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="analysis_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

@@ -50,6 +50,14 @@ print(avg_activity_duration)
 ```
 
 ```{r}
+respondent_counts <- dbplyr_resp |>
+  count(sex, employment_status) |>
+  collect()
+
+print(respondent_counts)
+```
+
+```{r}
 #| cache: true
 activity_avg <- dbplyr_resp |>
   filter(day_type == "Weekday", employment_status == "Not in labor force") |>
