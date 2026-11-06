@@ -2,3 +2,6 @@ analysis_files
 
 analysis_cache
 data/*.duckdb
+
+/.quarto/
+**/*.quarto_ipynb

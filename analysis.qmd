@@ -1,4 +1,27 @@
----
+library(ggplot2)
+library(dplyr)
+
+ggplot(hourly_avg, 
+       aes(x = hour, 
+           y = avg_minutes, 
+           fill = category)) +
+  geom_area(position = "stack") +
+  facet_wrap(~ sex) +
+  scale_x_continuous(
+    breaks = 0:23,
+    labels = function(x) {
+      sprintf("%02d:00", x)
+    }
+  ) +
+  labs(
+    title = "How the Day Fills Up",
+    subtitle = "Average daily minutes spent in each activity by hour and sex",
+    x = "Hour of the Day",
+    y = "Average Minutes",
+    fill = "Activity Category",
+    caption = "Source: hourly_avg dataset"
+  ) +
+  theme_minimal()---
 title: "Analyzing Americans' Time Use"
 author: "Chloe Mercurio"
 execute:
