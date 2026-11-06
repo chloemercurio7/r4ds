@@ -5,10 +5,9 @@ execute:
   echo: false
 ---
 
-An ATUS activity table contains 4.9 million rows, so it is stored in a DuckDB
-file rather than a CSV to avoid loading the entire table into R's memory.
-`dbplyr` translates familiar `dplyr` pipelines into SQL for DuckDB to run; R
-receives only the requested rows when you call `collect()`.
+A database table lives on disk and can be arbitrarily large, while a data frame lives in memory. The ATUS activity table you are about to use has 4.9 million rows, which is why it ships as a DuckDB file rather than as a CSV you would read into R.
+
+**dbplyr** is the translator: you write an ordinary **dplyr** pipeline against a database table, it turns the pipeline into SQL, and the database — here DuckDB, running inside your R session through the **duckdb** driver and the **DBI** interface — does the work. R receives only the rows you ask for with `collect()`.
 
 The `activities` table records each diary entry's start time and duration.
 `respondents` has one row per person, including sex, age, and employment
@@ -33,6 +32,8 @@ con <- dbConnect(duckdb(), dbdir = "data/atus.duckdb", read_only = TRUE)
 dbplyr_act <- tbl(con, "activities")
 dbplyr_resp <- tbl(con, "respondents")
 dbplyr_codes <- tbl(con, "activity_codes")
+
+dbplyr_act
 ```
 
 ```{r}
@@ -126,3 +127,14 @@ hourly_avg <- tidyr::crossing(
 
 print(hourly_avg)
 ```
+
+`..` is the directory one level up. Everything in a Codespace lives under
+`/workspaces`: the course's `codespace-starter` folder, which the Codespace
+was built from, and one folder per repo you have connected, here just
+`r4ds-6`. If `analysis.qmd` ever goes missing, look here first: it must be
+inside `/workspaces/r4ds-6`, not beside it.
+
+The prompt names the folder you are in, which is the working directory every
+command runs from: `quarto render analysis.qmd` works only when the prompt says
+`r4ds-6 $`. A new bash Terminal always opens in the folder VS Code has open,
+so the quickest fix for a terminal that has wandered off is a new one.
