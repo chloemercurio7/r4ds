@@ -8,7 +8,7 @@
 
 <meta name="author" content="Chloe Mercurio">
 
-<title>Analyzing NBA Recruits</title>
+<title>Analyzing Americans’ Time Use</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -53,7 +53,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Analyzing NBA Recruits</h1>
+<h1 class="title">Analyzing Americans’ Time Use</h1>
 </div>
 
 
@@ -76,40 +76,37 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<p>A database table lives on disk and can be arbitrarily large, while a data frame lives in memory. The ATUS activity table you are about to use has 4.9 million rows, which is why it ships as a DuckDB file rather than as a CSV you would read into R.</p>
+<p><strong>dbplyr</strong> is the translator: you write an ordinary <strong>dplyr</strong> pipeline against a database table, it turns the pipeline into SQL, and the database — here DuckDB, running inside your R session through the <strong>duckdb</strong> driver and the <strong>DBI</strong> interface — does the work. R receives only the rows you ask for with <code>collect()</code>.</p>
+<p>The <code>activities</code> table records each diary entry’s start time and duration. <code>respondents</code> has one row per person, including sex, age, and employment status, while <code>activity_codes</code> maps numeric codes to category names. The six-digit <code>activity_code</code> encodes a three-level hierarchy: <code>120303</code> means Socializing, Relaxing, and Leisure (<code>12</code>) &gt; TV and Movies (<code>03</code>) &gt; Watching TV (<code>03</code>). Likewise, <code>start_hhmm</code> encodes time in HHMM format, so <code>1430</code> means 2:30 PM.</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 1,873
-Columns: 10
-$ name          &lt;chr&gt; "Al Harrington", "Rashard Lewis", "Korleone Young", "Dan…
-$ rank          &lt;dbl&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 16, 1…
-$ recruit_year  &lt;dbl&gt; 1998, 1998, 1998, 1998, 1998, 1998, 1998, 1998, 1998, 19…
-$ college       &lt;chr&gt; NA, NA, NA, "University of California, Los Angeles", "Lo…
-$ drafted       &lt;lgl&gt; TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, …
-$ recruit_group &lt;chr&gt; "#1–10", "#1–10", "#1–10", "#1–10", "#1–10", "#1–10", "#…
-$ nba_mean_ws48 &lt;dbl&gt; 0.07390909, 0.13525000, NA, 0.14000000, 0.12450000, NA, …
-$ top_mean_wa   &lt;dbl&gt; 3.946000, 11.672000, NA, 4.600000, 0.970000, NA, NA, 3.8…
-$ total_seasons &lt;dbl&gt; 16, 16, 1, 10, 9, NA, NA, 13, 13, NA, 1, 14, 17, NA, NA,…
-$ tier          &lt;chr&gt; "Solid career", "Superstar", "Brief career", "Solid care…</code></pre>
+<div class="cell-output cell-output-stderr">
+<pre><code>duckdb keeps downloaded extensions and secrets in a temporary directory:
+ℹ /tmp/RtmpAIvhrI/duckdb
+This is removed when the R session ends.
+• Extensions are re-downloaded each session.
+• Secrets are lost.
+ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+ℹ See ?duckdb_storage for details and alternatives.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>      rank        nba_mean_ws48       top_mean_wa     total_seasons   
- Min.   :  1.00   Min.   :-0.03000   Min.   :-2.980   Min.   : 0.000  
- 1st Qu.: 25.00   1st Qu.: 0.07000   1st Qu.: 0.970   1st Qu.: 1.000  
- Median : 50.00   Median : 0.09200   Median : 2.990   Median : 4.000  
- Mean   : 50.19   Mean   : 0.09622   Mean   : 3.746   Mean   : 5.071  
- 3rd Qu.: 75.00   3rd Qu.: 0.12050   3rd Qu.: 5.364   3rd Qu.: 8.000  
- Max.   :100.00   Max.   : 0.25046   Max.   :24.708   Max.   :18.000  
- NAs    :338      NAs    :1504       NAs    :1504     NAs    :940     
-  drafted       
- Mode :logical  
- FALSE:1255     
- TRUE :618      
-                
-                
-                
-                </code></pre>
+<div class="cell-output cell-output-stderr">
+<pre><code>! Grouped output by "tucaseid" and "sex".
+ℹ Override behaviour and silence this message with the `.groups` argument.
+ℹ Or use `.by` instead of `group_by()`.
+! Grouped output by "sex".
+ℹ Override behaviour and silence this message with the `.groups` argument.
+ℹ Or use `.by` instead of `group_by()`.</code></pre>
+</div>
+</div>
+<p>That render took as long as the last one, because the aggregation over 4.9 million rows still had to run once to fill <code>analysis_cache/</code>. From now on every render reads the 36-row <code>activity_avg</code> back from disk and never touches the database. The cache is keyed on the chunk’s code, not on the database file. If you ever drop a newer <code>atus.duckdb</code> into <code>data/</code>, delete <code>analysis_cache/</code> before trusting the numbers.</p>
+<div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>! Grouped output by "sex", "major_code", and "major_name".
+ℹ Override behaviour and silence this message with the `.groups` argument.
+ℹ Or use `.by` instead of `group_by()`.</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -121,9 +118,12 @@ $ tier          &lt;chr&gt; "Solid career", "Superstar", "Brief career", "Solid 
 </div>
 </div>
 </div>
-<p>The <code>college</code> column is <code>NA</code> for 81 players, among them the prep-to-pro stars who skipped college before the NBA’s 2006 age rule — Amar’e Stoudemire (2002), LeBron James (2003), and Dwight Howard (2004). Among the rest, Kentucky (41), Duke (39), and Kansas (38) sent the most top-100 recruits in these 16 classes.</p>
-<p><code>drafted</code> is <code>FALSE</code> for 1,255 of the 1,873 players in <code>basketball_tibble</code> and <code>TRUE</code> for only 618: most of the top-ranked high school players The Pudding tracked were never drafted at all.</p>
-<p>Of the 40 players in the “Superstar” tier, 12 came from the “#1–10” group, but 8 were never ranked in the top 100 at all. The draft gap is far wider than the stardom gap: 84% of “#1–10” recruits were drafted, against 13% of the “#51–100” group.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="analysis_files/hourly-area-chart.png" class="img-fluid figure-img"></p>
+<figcaption>Screenshot of the hourly activity area chart</figcaption>
+</figure>
+</div>
 
 </main>
 <!-- /main column -->
