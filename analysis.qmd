@@ -116,3 +116,19 @@ hourly_avg <- tidyr::crossing(
 
 print(hourly_avg)
 ```
+
+```{r}
+activity_avg |>
+  filter(major_name != "Data Codes") |>
+  ggplot(aes(x = reorder(major_name, avg_minutes), y = avg_minutes, fill = sex)) +
+  geom_col(position = "dodge") +
+  coord_flip() +
+  labs(
+    title = "Average Daily Activity Time",
+    subtitle = "Weekday respondents not in the labor force, by sex",
+    x = "Major activity category",
+    y = "Average minutes per day",
+    fill = "Sex",
+    caption = "Source: American Time Use Survey (ATUS)"
+  )
+```
