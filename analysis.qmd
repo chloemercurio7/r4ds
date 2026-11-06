@@ -72,3 +72,47 @@ render reads the 36-row `activity_avg` back from disk and never touches the
 database. The cache is keyed on the chunk's code, not on the database file. If
 you ever drop a newer `atus.duckdb` into `data/`, delete `analysis_cache/`
 before trusting the numbers.
+
+```{r}
+weekday_respondents <- dbplyr_resp |>
+  filter(day_type == "Weekday", employment_status == "Not in labor force") |>
+  select(tucaseid, sex)
+
+weekday_sex_counts <- weekday_respondents |>
+  count(sex, name = "n_respondents") |>
+  collect()
+
+major_categories <- dbplyr_codes |>
+  filter(major_code %in% c(1, 2, 3, 12)) |>
+  distinct(major_code, major_name) |>
+  collect()
+
+hourly_minutes <- dbplyr_act |>
+  inner_join(weekday_respondents, by = "tucaseid") |>
+  inner_join(
+    dbplyr_codes |>
+      filter(major_code %in% c(1, 2, 3, 12)) |>
+      select(activity_code, major_code, major_name),
+    by = "activity_code"
+  ) |>
+  mutate(hour = floor(start_hhmm / 100)) |>
+  filter(hour >= 6, hour <= 23) |>
+  group_by(sex, major_code, major_name, hour) |>
+  summarize(total_minutes = sum(duration_min, na.rm = TRUE)) |>
+  collect()
+
+hourly_avg <- tidyr::crossing(
+  weekday_sex_counts,
+  major_categories,
+  hour = 6:23
+) |>
+  left_join(
+    hourly_minutes,
+    by = c("sex", "major_code", "major_name", "hour")
+  ) |>
+  mutate(avg_minutes = coalesce(total_minutes, 0) / n_respondents) |>
+  select(sex, major_code, major_name, hour, avg_minutes) |>
+  arrange(sex, major_code, hour)
+
+print(hourly_avg)
+```
