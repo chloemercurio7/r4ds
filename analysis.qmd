@@ -113,8 +113,6 @@ hourly_avg <- tidyr::crossing(
   mutate(avg_minutes = coalesce(total_minutes, 0) / n_respondents) |>
   select(sex, major_code, major_name, hour, avg_minutes) |>
   arrange(sex, major_code, hour)
-
-print(hourly_avg)
 ```
 
 ```{r}
